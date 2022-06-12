@@ -34,4 +34,4 @@ class CommandTests(SimpleTestCase):
 
         # Call count of exception caught
         self.assertEqual(patched_check.call_count, 6)
-        patched_check.assert_call_with(databases=['default'])
+        patched_check.assert_called_with(databases=['default'])
