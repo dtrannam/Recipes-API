@@ -9,24 +9,29 @@ from django.core.management import call_command
 from django.db.utils import OperationalError
 from django.test import SimpleTestCase
 
-@patch('django.db.utils.ConnectionHandler.__getitem__')
+@patch('core.management.commands.wait_for_db.Command.check')
 class CommandTests(SimpleTestCase):
     """Test commands."""
 
-    def test_wait_for_db_ready(self, patched_getitem):
+    def test_wait_for_db_ready(self, patched_check):
         """Test waiting for database if database ready."""
-        patched_getitem.return_value = True
+        patched_check.return_value = True
 
         call_command('wait_for_db')
 
-        self.assertEqual(patched_getitem.call_count, 1)
+        patched_check.assert_called_once_with(databases=['default'])
 
+    # Override behavior of sleep to not pause our code in this unitest and hold off test
     @patch('time.sleep')
-    def test_wait_for_db_delay(self, patched_sleep, patched_getitem):
+    def test_wait_for_db_delay(self, patched_sleep, patched_check):
         """Test waiting for database when getting OperationalError."""
-        patched_getitem.side_effect = [Psycopg2OpError] + \
-            [OperationalError] * 5 + [True]
+        # PS Error refers to the set up of the db while OP refers to the time it takes to
+        # db to get ready to run
+        patched_check.side_effect = [Psycopg2OpError] * 2 + \
+            [OperationalError] * 3 + [True]
 
         call_command('wait_for_db')
 
-        self.assertEqual(patched_getitem.call_count, 6)
+        # Call count of exception caught
+        self.assertEqual(patched_check.call_count, 6)
+        patched_check.assert_call_with(databases=['default'])
