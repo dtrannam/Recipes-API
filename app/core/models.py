@@ -26,9 +26,8 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError('Missing Email')
         user = self.create_user(email, password)
-        user.set_password(password)
         user.is_staff = True
-        user.superuser = True
+        user.is_superuser = True
         user.save(using=self._db)
 
         return user
