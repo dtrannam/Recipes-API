@@ -44,17 +44,3 @@ class ModelTest(TestCase):
         )
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
-
-    def test_edit_user_page(self):
-        """Test the edit user page works."""
-        url = reverse('admin:core_user_change', args=[self.user.id])
-        res = self.client.get(url)
-
-        self.assertEqual(res.status_code, 200)
-
-    def test_create_user_page(self):
-        """Test create user page works"""
-        url = reverse('admin:core_user_add')
-        res = self.client.get(url)
-        
-        self.assertEqual(res.status_code, 200)
